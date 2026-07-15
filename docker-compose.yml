@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Container 1: The MySQL Database
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db-container
+    environment:
+      MYSQL_DATABASE: medi_ai_sales
+      MYSQL_USER: medi_user
+      MYSQL_PASSWORD: medi1234
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  # Container 2: The Spring Boot App
+  app:
+    build: .
+    container_name: spring-app-container
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql-db
+    environment:
+      DB_URL: jdbc:mysql://mysql-db-container:3306/medi_ai_sales
+      DB_USERNAME: medi_user
+      DB_PASSWORD: medi1234
+
+# Keeps database data safe on your computer even if containers stop
+volumes:
+  mysql-data:
