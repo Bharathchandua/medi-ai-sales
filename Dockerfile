@@ -1,14 +1,13 @@
-# 1. Start with a base image containing Java 17 (The environment)
-FROM eclipse-temurin:17-jdk-alpine
-
-# 2. Set the working directory inside the container
+# Stage 1: Build stage using Maven
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# 3. Copy our compiled JAR file into the container and rename it to 'app.jar'
-COPY target/medi-ai-sales-0.0.1-SNAPSHOT.jar app.jar
-
-# 4. Expose the port our app runs on (8080)
+# Stage 2: Runtime stage with Java 17
+FROM eclipse-temurin:17-jdk-alpine
+WORKDIR /app
+COPY --from=build /app/target/medi-ai-sales-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
-
-# 5. The command to run when the container starts
 ENTRYPOINT ["java", "-jar", "app.jar"]
