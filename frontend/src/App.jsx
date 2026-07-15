@@ -7,7 +7,7 @@ import './App.css';
 
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:8080'
-  : 'https://medi-ai-sales.onrender.com'; // We will adjust this URL once the Render backend is live!
+  : 'https://medi-ai-sales-backend.onrender.com';
 
 export default function App() {
   // --- STATE VARIABLES ---
