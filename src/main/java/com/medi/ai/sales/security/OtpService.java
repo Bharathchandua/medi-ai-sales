@@ -43,25 +43,52 @@ public class OtpService {
         return otp;
     }
 
-    // 3. Email transmission method running asynchronously to avoid thread blocking
+    // 3. Email transmission method running asynchronously via Brevo HTTP API
     private void sendOtpEmail(String email, String otp) {
         new Thread(() -> {
             try {
-                SimpleMailMessage message = new SimpleMailMessage();
-                message.setTo(email);
-                message.setSubject("Medi-AI-Sales OTP Verification");
-                message.setText("Hello,\n\nYour 6-digit verification code is: " + otp +
-                        "\n\nThis code is valid for 5 minutes. If you did not request this, please ignore this email.\n\nBest regards,\nMedi-AI-Sales Team");
+                String apiKey = System.getenv("BREVO_API_KEY");
+                if (apiKey == null || apiKey.trim().isEmpty()) {
+                    throw new IllegalStateException("BREVO_API_KEY environment variable is not configured.");
+                }
+                
+                java.net.URL url = new java.net.URL("https://api.brevo.com/v3/smtp/email");
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("accept", "application/json");
+                conn.setRequestProperty("api-key", apiKey);
+                conn.setRequestProperty("content-type", "application/json");
+                conn.setDoOutput(true);
 
-                // Render blocks SMTP ports by default, causing synchronous mail sending to hang.
-                // Running this in a background thread keeps the API responsive.
-                mailSender.send(message);
-                System.out.println(">>> OTP successfully sent to email: " + email);
+                String jsonPayload = "{"
+                        + "\"sender\":{\"name\":\"Medi-AI-Sales\",\"email\":\"bharath.anand.m@gmail.com\"},"
+                        + "\"to\":[{\"email\":\"" + email + "\"}],"
+                        + "\"subject\":\"Medi-AI-Sales OTP Verification\","
+                        + "\"htmlContent\":\"<html><body>"
+                        + "<h2>Medi-AI-Sales Verification</h2>"
+                        + "<p>Hello,</p>"
+                        + "<p>Your 6-digit verification code is: <strong>" + otp + "</strong></p>"
+                        + "<p>This code is valid for 5 minutes. If you did not request this code, please ignore this email.</p>"
+                        + "<br/><p>Best regards,<br/>Medi-AI-Sales Team</p>"
+                        + "</body></html>\""
+                        + "}";
+
+                try (java.io.OutputStream os = conn.getOutputStream()) {
+                    byte[] input = jsonPayload.getBytes("utf-8");
+                    os.write(input, 0, input.length);
+                }
+
+                int code = conn.getResponseCode();
+                if (code >= 200 && code < 300) {
+                    System.out.println(">>> OTP successfully sent via Brevo HTTP API to: " + email);
+                } else {
+                    throw new RuntimeException("Brevo API responded with HTTP error code: " + code);
+                }
             } catch (Exception e) {
-                // Safe Fallback: If mail properties are missing or blocked, print OTP in console
+                // Safe Fallback: If HTTP call fails, print OTP in console
                 System.out.println("\n");
                 System.out.println("==================================================");
-                System.out.println("[WARNING] Could not send real email OTP (SMTP settings not configured or blocked by cloud provider).");
+                System.out.println("[WARNING] Could not send real email OTP via Brevo API: " + e.getMessage());
                 System.out.println(">>> REGISTRATION OTP FOR: " + email);
                 System.out.println(">>> YOUR 6-DIGIT CODE IS: " + otp);
                 System.out.println("==================================================");
