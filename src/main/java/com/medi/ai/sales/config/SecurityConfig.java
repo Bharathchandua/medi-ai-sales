@@ -43,8 +43,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Allow our React dev server origin
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        // Allow our React dev server and any deployed Vercel subdomains
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:5173", "https://*.vercel.app"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
