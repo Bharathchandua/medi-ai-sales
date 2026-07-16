@@ -51,6 +51,8 @@ export default function App() {
   const [resetOtp, setResetOtp] = useState('');
   const [resetPasswordVal, setResetPasswordVal] = useState('');
   const [resetOtpSent, setResetOtpSent] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [resetOtpLoading, setResetOtpLoading] = useState(false);
 
   // Database Record States
   const [products, setProducts] = useState([]);
@@ -142,6 +144,7 @@ export default function App() {
       return;
     }
 
+    setOtpLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/register/send-otp`, {
         method: 'POST',
@@ -158,6 +161,8 @@ export default function App() {
       setSuccessMsg('OTP code sent successfully!');
     } catch (err) {
       setAuthError(err.message);
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -209,6 +214,7 @@ export default function App() {
       return;
     }
 
+    setResetOtpLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password/send-otp`, {
         method: 'POST',
@@ -225,6 +231,8 @@ export default function App() {
       setSuccessMsg('Recovery code sent successfully!');
     } catch (err) {
       setAuthError(err.message);
+    } finally {
+      setResetOtpLoading(false);
     }
   };
 
@@ -559,8 +567,13 @@ export default function App() {
                           required 
                         />
                       </div>
-                      <button type="button" className="btn-secondary" onClick={handleSendRegOtp}>
-                        Send OTP
+                      <button 
+                        type="button" 
+                        className="btn-secondary" 
+                        onClick={handleSendRegOtp}
+                        disabled={otpLoading}
+                      >
+                        {otpLoading ? 'Sending...' : 'Send OTP'}
                       </button>
                     </div>
                   </div>
@@ -651,8 +664,13 @@ export default function App() {
                           required 
                         />
                       </div>
-                      <button type="button" className="btn-secondary" onClick={handleSendResetOtp}>
-                        Send OTP
+                      <button 
+                        type="button" 
+                        className="btn-secondary" 
+                        onClick={handleSendResetOtp}
+                        disabled={resetOtpLoading}
+                      >
+                        {resetOtpLoading ? 'Sending...' : 'Send OTP'}
                       </button>
                     </div>
                   </div>
