@@ -61,4 +61,9 @@ public class AuthController {
     public String testDbRegister() {
         return authService.testDbRegister();
     }
+
+    @org.springframework.web.bind.annotation.GetMapping("/list-users")
+    public String listUsers() {
+        return authService.listUsers();
+    }
 }

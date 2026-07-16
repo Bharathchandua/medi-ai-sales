@@ -154,4 +154,22 @@ public class AuthService {
             return "ERROR: " + e.getMessage() + "\n\nSTACKTRACE:\n" + sw.toString();
         }
     }
+
+    public String listUsers() {
+        try {
+            java.util.List<User> users = userRepository.findAll();
+            StringBuilder sb = new StringBuilder();
+            sb.append("TOTAL USERS REGISTERED: ").append(users.size()).append("\n\n");
+            for (User u : users) {
+                sb.append("ID: ").append(u.getId())
+                  .append(" | Username: ").append(u.getUsername())
+                  .append(" | Email: ").append(u.getEmail())
+                  .append(" | Role: ").append(u.getRole())
+                  .append("\n");
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            return "ERROR: " + e.getMessage();
+        }
+    }
 }
