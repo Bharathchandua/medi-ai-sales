@@ -56,4 +56,9 @@ public class AuthController {
     public String resetUser() {
         return authService.resetUser();
     }
+
+    @org.springframework.web.bind.annotation.GetMapping("/test-db-register")
+    public String testDbRegister() {
+        return authService.testDbRegister();
+    }
 }

@@ -132,4 +132,26 @@ public class AuthService {
         userRepository.save(user);
         return "Password for user 'bharath' has been reset to: Password123";
     }
+
+    public String testDbRegister() {
+        try {
+            userRepository.findByUsername("testuser").ifPresent(userRepository::delete);
+            userRepository.findByEmail("test@test.com").ifPresent(userRepository::delete);
+
+            User testUser = new User(
+                    "testuser",
+                    passwordEncoder.encode("password123"),
+                    "test@test.com",
+                    "1234567890",
+                    Role.ADMIN
+            );
+            userRepository.save(testUser);
+            return "SUCCESS: Test user registered successfully!";
+        } catch (Exception e) {
+            java.io.StringWriter sw = new java.io.StringWriter();
+            java.io.PrintWriter pw = new java.io.PrintWriter(sw);
+            e.printStackTrace(pw);
+            return "ERROR: " + e.getMessage() + "\n\nSTACKTRACE:\n" + sw.toString();
+        }
+    }
 }
