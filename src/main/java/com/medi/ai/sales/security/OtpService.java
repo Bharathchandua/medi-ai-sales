@@ -43,27 +43,31 @@ public class OtpService {
         return otp;
     }
 
-    // 3. Email transmission method with local console fallback
+    // 3. Email transmission method running asynchronously to avoid thread blocking
     private void sendOtpEmail(String email, String otp) {
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(email);
-            message.setSubject("Medi-AI-Sales OTP Verification");
-            message.setText("Hello,\n\nYour 6-digit verification code is: " + otp +
-                    "\n\nThis code is valid for 5 minutes. If you did not request this, please ignore this email.\n\nBest regards,\nMedi-AI-Sales Team");
+        new Thread(() -> {
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setTo(email);
+                message.setSubject("Medi-AI-Sales OTP Verification");
+                message.setText("Hello,\n\nYour 6-digit verification code is: " + otp +
+                        "\n\nThis code is valid for 5 minutes. If you did not request this, please ignore this email.\n\nBest regards,\nMedi-AI-Sales Team");
 
-            mailSender.send(message);
-            System.out.println(">>> OTP successfully sent to email: " + email);
-        } catch (Exception e) {
-            // Safe Fallback: If mail properties are missing, print OTP in console
-            System.out.println("\n");
-            System.out.println("==================================================");
-            System.out.println("[WARNING] Could not send real email OTP (SMTP settings not configured).");
-            System.out.println(">>> REGISTRATION OTP FOR: " + email);
-            System.out.println(">>> YOUR 6-DIGIT CODE IS: " + otp);
-            System.out.println("==================================================");
-            System.out.println("\n");
-        }
+                // Render blocks SMTP ports by default, causing synchronous mail sending to hang.
+                // Running this in a background thread keeps the API responsive.
+                mailSender.send(message);
+                System.out.println(">>> OTP successfully sent to email: " + email);
+            } catch (Exception e) {
+                // Safe Fallback: If mail properties are missing or blocked, print OTP in console
+                System.out.println("\n");
+                System.out.println("==================================================");
+                System.out.println("[WARNING] Could not send real email OTP (SMTP settings not configured or blocked by cloud provider).");
+                System.out.println(">>> REGISTRATION OTP FOR: " + email);
+                System.out.println(">>> YOUR 6-DIGIT CODE IS: " + otp);
+                System.out.println("==================================================");
+                System.out.println("\n");
+            }
+        }).start();
     }
 
     // 4. Validate OTP
