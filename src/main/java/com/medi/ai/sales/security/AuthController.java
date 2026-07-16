@@ -46,4 +46,14 @@ public class AuthController {
     public void resetPassword(@Valid @RequestBody AuthRequest.ResetPasswordRequest request) {
         authService.resetPassword(request);
     }
+
+    @org.springframework.web.bind.annotation.GetMapping("/setup-default-admin")
+    public String setupDefaultAdmin() {
+        return authService.setupDefaultAdmin();
+    }
+
+    @org.springframework.web.bind.annotation.GetMapping("/reset-user")
+    public String resetUser() {
+        return authService.resetUser();
+    }
 }

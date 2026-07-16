@@ -107,4 +107,29 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
     }
+
+    public String setupDefaultAdmin() {
+        if (userRepository.findByUsername("admin").isPresent()) {
+            return "Admin already exists!";
+        }
+        User admin = new User(
+                "admin",
+                passwordEncoder.encode("admin123"),
+                "admin@medi.com",
+                "1234567890",
+                Role.ADMIN
+        );
+        userRepository.save(admin);
+        return "Admin account successfully created! Username: admin, Password: admin123";
+    }
+
+    public String resetUser() {
+        User user = userRepository.findByUsername("bharath").orElse(null);
+        if (user == null) {
+            return "User bharath not found!";
+        }
+        user.setPassword(passwordEncoder.encode("Password123"));
+        userRepository.save(user);
+        return "Password for user 'bharath' has been reset to: Password123";
+    }
 }
